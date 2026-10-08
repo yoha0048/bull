@@ -1,0 +1,46 @@
+---
+/**
+ * ロゴ。src/data/assets.ts にロゴ画像のパスがあれば画像を、なければ文字ロゴを表示する。
+ */
+import { assets } from '../data/assets';
+import { site } from '../data/site';
+
+interface Props {
+  /** 濃紺の背景の上に置くとき */
+  onDark?: boolean;
+}
+
+const { onDark = false } = Astro.props;
+const src = onDark ? assets.logoOnDark || assets.logo : assets.logo;
+---
+
+{
+  src ? (
+    <img class="logo-img" src={src} alt={site.name} width="120" height="32" />
+  ) : (
+    <span class:list={['logo-text', { 'is-dark': onDark }]}>
+      {site.logoText}
+      <span class="visually-hidden">（{site.name}）</span>
+    </span>
+  )
+}
+
+<style>
+  .logo-img {
+    width: auto;
+    height: 28px;
+  }
+
+  .logo-text {
+    font-family: var(--font-en);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--color-deep-navy);
+  }
+
+  .logo-text.is-dark {
+    color: var(--color-white);
+  }
+</style>

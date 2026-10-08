@@ -1,0 +1,156 @@
+/* 全ページ共通の基本スタイル */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: var(--header-height);
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-ja);
+  font-size: var(--fs-body);
+  font-weight: 400;
+  line-height: 1.9;
+  letter-spacing: 0.04em;
+  font-feature-settings: 'palt' 0;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  font-feature-settings: 'palt' 1;
+}
+
+/* 日本語の改行位置を自然にする（対応ブラウザのみ） */
+h1,
+h2,
+h3,
+p,
+li {
+  word-break: auto-phrase;
+  line-break: strict;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--color-blue);
+  color: var(--color-white);
+}
+
+/* ---- Utilities ---- */
+
+.container {
+  width: 100%;
+  max-width: calc(var(--container) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+/* セクション見出しの上に置く英字ラベル */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;
+  font-family: var(--font-en);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-blue);
+}
+
+.label::before {
+  content: '';
+  width: 2.5em;
+  height: 1px;
+  background: currentColor;
+}
+
+/* 未入力の項目（【要入力】） */
+.tbd {
+  color: var(--color-error);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

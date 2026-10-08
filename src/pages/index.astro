@@ -1,0 +1,905 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ButtonLink from '../components/ButtonLink.astro';
+import ContactCta from '../components/ContactCta.astro';
+import { company } from '../data/company';
+import { connection, forYou, hero, statement, whatWeDo } from '../data/top';
+
+/*
+ * Connection セクションの線と点（演出A「Horizon Line」）
+ * 座標は SVG 上の位置（表示範囲は x:0〜1200, y:280〜800）。group はスクロールで現れる順番（0〜5）。
+ * 線は左から右へ流れる曲線にして、地球や球体のネットワークに見えないようにしている。
+ */
+const nodes = {
+  n1: { x: 150, y: 540, group: 0 },
+  n2: { x: 320, y: 460, group: 0 },
+  n3: { x: 430, y: 600, group: 1 },
+  n4: { x: 560, y: 500, group: 1 },
+  n5: { x: 690, y: 400, group: 2 },
+  n6: { x: 730, y: 630, group: 2 },
+  n7: { x: 860, y: 520, group: 2 },
+};
+type NodeKey = keyof typeof nodes;
+type Point = { x: number; y: number };
+
+const curve = (a: Point, b: Point) => {
+  const dx = (b.x - a.x) * 0.5;
+  return `M${a.x} ${a.y} C${a.x + dx} ${a.y} ${b.x - dx} ${b.y} ${b.x} ${b.y}`;
+};
+
+const edges: { from: NodeKey; to: NodeKey | Point; group: number }[] = [
+  // 人と、人が出会う。
+  { from: 'n1', to: 'n2', group: 0 },
+  // 企業と、企業が手を組む。
+  { from: 'n2', to: 'n4', group: 1 },
+  { from: 'n1', to: 'n3', group: 1 },
+  { from: 'n3', to: 'n4', group: 1 },
+  // ビジネスが、ビジネスを呼ぶ。
+  { from: 'n4', to: 'n5', group: 2 },
+  { from: 'n4', to: 'n6', group: 2 },
+  { from: 'n3', to: 'n6', group: 2 },
+  { from: 'n5', to: 'n7', group: 2 },
+  { from: 'n6', to: 'n7', group: 2 },
+  // 日本と、世界が地続きになる。（画面の外へ伸びる線）
+  { from: 'n7', to: { x: 1320, y: 450 }, group: 3 },
+  { from: 'n7', to: { x: 1320, y: 600 }, group: 3 },
+  { from: 'n5', to: { x: 1320, y: 385 }, group: 3 },
+  { from: 'n6', to: { x: 1320, y: 700 }, group: 3 },
+];
+
+const paths = edges.map((edge) => {
+  const a = nodes[edge.from];
+  const b = typeof edge.to === 'string' ? nodes[edge.to] : edge.to;
+  return { d: curve(a, b), group: edge.group };
+});
+
+// 新しい可能性が、生まれる。（右側に散らばる小さな点。毎回同じ配置になるよう固定の計算式で生成）
+const sparks = Array.from({ length: 26 }, (_, i) => ({
+  x: 620 + ((i * 197) % 560),
+  y: 300 + ((i * 131) % 420),
+  r: 1.6 + ((i * 7) % 4) * 0.5,
+}));
+
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<BaseLayout>
+  <!-- ========== Hero ========== -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="container hero__inner">
+      <p class="hero__company">{company.name}</p>
+      <h1 id="hero-heading" class="hero__copy" data-hero-copy>
+        {
+          hero.lines.map((line, i) => (
+            <span class="hero__copy-line">
+              <span class="hero__copy-text" style={`--i:${i}`}>
+                {line}
+              </span>
+            </span>
+          ))
+        }
+      </h1>
+    </div>
+
+    <div class="hero__horizon" aria-hidden="true" data-hero-horizon>
+      <span class="hero__line"></span>
+      <span class="hero__dot hero__dot--start" style="--x:0%; --d:0"></span>
+      <span class="hero__dot" style="--x:34%; --d:1"></span>
+      <span class="hero__dot" style="--x:63%; --d:2"></span>
+    </div>
+
+    <div class="container">
+      <p class="hero__sub" lang="en">{hero.sub}</p>
+    </div>
+
+    <div class="hero__scroll" aria-hidden="true">
+      <span class="hero__scroll-text">Scroll</span>
+      <span class="hero__scroll-bar"></span>
+    </div>
+  </section>
+
+  <!-- ========== Statement ========== -->
+  <section class="statement" aria-labelledby="statement-heading">
+    <div class="container statement__inner">
+      <p class="label" data-reveal>{statement.label}</p>
+      <h2 id="statement-heading" class="statement__heading">
+        {statement.lines.map((line) => <span class="statement__line" data-reveal>{line}</span>)}
+      </h2>
+      <p class="statement__body" data-reveal>
+        {statement.body.map((line) => <span class="statement__body-line">{line}</span>)}
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== Connection（スクロールで線が広がる） ========== -->
+  <section class="connection" aria-labelledby="connection-heading" data-connection data-header-dark>
+    <div class="connection__stage" data-connection-stage>
+      <div class="container connection__text">
+        <div class="connection__meta">
+          <h2 id="connection-heading" class="label connection__label">{connection.label}</h2>
+          <p class="connection__counter" aria-hidden="true">
+            <span data-connection-counter>01</span> / {pad(connection.steps.length)}
+          </p>
+        </div>
+        <ol class="connection__phrases">
+          {
+            connection.steps.map((step) => (
+              <li class="connection__phrase" data-connection-phrase>
+                <span class="connection__ja">{step.ja}</span>
+                <span class="connection__en" lang="en">
+                  {step.en}
+                </span>
+              </li>
+            ))
+          }
+        </ol>
+        <span class="connection__progress" aria-hidden="true">
+          <span class="connection__progress-bar" data-connection-progress></span>
+        </span>
+      </div>
+
+      <div class="connection__visual" aria-hidden="true">
+        <svg
+          class="connection__svg"
+          viewBox="0 280 1200 520"
+          preserveAspectRatio="xMinYMax slice"
+          fill="none"
+          focusable="false"
+        >
+          <defs>
+            <linearGradient id="world-line" x1="800" y1="0" x2="1320" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#6fa8ff"></stop>
+              <stop offset="1" stop-color="#ffffff"></stop>
+            </linearGradient>
+          </defs>
+
+          <line class="connection__horizon" x1="0" y1="730" x2="1200" y2="730"></line>
+
+          <g class="connection__sparks" data-group="4">
+            {sparks.map((s) => <circle class="spark" cx={s.x} cy={s.y} r={s.r} />)}
+          </g>
+
+          {
+            [0, 1, 2, 3].map((group) => (
+              <g data-group={group}>
+                {paths
+                  .filter((p) => p.group === group)
+                  .map((p) => (
+                    <path class:list={['edge', { 'edge--world': group === 3 }]} d={p.d} />
+                  ))}
+                {Object.values(nodes)
+                  .filter((n) => n.group === group)
+                  .map((n) => (
+                    <g class="node">
+                      <circle class="node__halo" cx={n.x} cy={n.y} r="16" />
+                      <circle class="node__core" cx={n.x} cy={n.y} r="5" />
+                    </g>
+                  ))}
+              </g>
+            ))
+          }
+
+          <g class="connection__flow" data-group="5">
+            {paths.map((p) => <path class="flow" d={p.d} />)}
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== For You ========== -->
+  <section class="foryou" aria-labelledby="foryou-heading">
+    <div class="container foryou__inner">
+      <div class="foryou__head">
+        <p class="label" data-reveal>{forYou.label}</p>
+        <h2 id="foryou-heading" class="foryou__heading" data-reveal>{forYou.heading}</h2>
+      </div>
+
+      <div class="foryou__body">
+        <div class="foryou__list" data-foryou-list>
+          <span class="foryou__track" aria-hidden="true">
+            <span class="foryou__track-fill" data-foryou-track></span>
+          </span>
+          <ul>
+          {
+            forYou.items.map((item) => (
+              <li class="foryou__item" data-foryou-item>
+                <span class="foryou__dot" aria-hidden="true" />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+          </ul>
+        </div>
+        <p class="foryou__closing" data-reveal>
+          {forYou.closing.map((line) => <span class="foryou__closing-line">{line}</span>)}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== What We Do ========== -->
+  <section class="wwd" aria-labelledby="wwd-heading" data-wwd>
+    <div class="container">
+      <p class="label" data-reveal>{whatWeDo.label}</p>
+      <h2 id="wwd-heading" class="wwd__heading" data-reveal>{whatWeDo.heading}</h2>
+      <p class="wwd__lead" data-reveal>{whatWeDo.lead}</p>
+
+      <div class="wwd__track">
+        <span class="wwd__rail" aria-hidden="true"><span class="wwd__rail-fill" data-wwd-rail></span></span>
+        <ol class="wwd__list">
+          {
+            whatWeDo.domains.map((domain) => (
+              <li class="wwd__item" data-wwd-item>
+                <span class="wwd__dot" aria-hidden="true" />
+                <p class="wwd__en" lang="en">
+                  {domain.en}
+                </p>
+                <h3 class="wwd__name">{domain.name}</h3>
+                <p class="wwd__copy">{domain.copy}</p>
+                <p class="wwd__text">{domain.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+      <div class="wwd__more" data-reveal>
+        <ButtonLink href="/business/" variant="outline">{whatWeDo.linkLabel}</ButtonLink>
+      </div>
+    </div>
+  </section>
+
+  <ContactCta />
+</BaseLayout>
+
+<script>
+  import { initTopAnimations } from '../scripts/top-animations';
+  initTopAnimations();
+</script>
+
+<style>
+  /* =========================================================
+     Hero
+     ========================================================= */
+  .hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding-block: calc(var(--header-height) + 40px) 120px;
+    overflow: hidden;
+    background:
+      radial-gradient(70% 60% at 92% 18%, rgb(220 233 247 / 0.95) 0%, transparent 70%),
+      radial-gradient(50% 40% at 10% 100%, rgb(220 233 247 / 0.6) 0%, transparent 70%),
+      var(--color-paper);
+  }
+
+  .hero__company {
+    font-size: var(--fs-small);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--color-slate);
+  }
+
+  .hero__copy {
+    margin-top: clamp(16px, 2.4vw, 28px);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    color: var(--color-deep-navy);
+  }
+
+  .hero__copy-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+    white-space: nowrap;
+  }
+
+  .hero__copy-text {
+    display: inline-block;
+  }
+
+  /* 画面の外まで続く水平線 */
+  .hero__horizon {
+    position: relative;
+    height: 12px;
+    margin-top: clamp(32px, 5vw, 64px);
+    margin-left: var(--gutter);
+  }
+
+  @media (min-width: 1328px) {
+    .hero__horizon {
+      margin-left: calc((100vw - var(--container)) / 2);
+    }
+  }
+
+  .hero__line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-blue) 0%, var(--color-horizon) 60%, var(--color-mist) 100%);
+    transform-origin: left;
+  }
+
+  .hero__dot {
+    position: absolute;
+    top: 50%;
+    left: var(--x);
+    width: 11px;
+    height: 11px;
+    margin: -5.5px 0 0 -5.5px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    box-shadow: 0 0 0 6px rgb(36 86 240 / 0.12);
+  }
+
+  .hero__dot--start {
+    margin-left: 0;
+  }
+
+  .hero__sub {
+    margin-top: clamp(20px, 3vw, 32px);
+    font-family: var(--font-en);
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--color-blue);
+  }
+
+  .hero__scroll {
+    position: absolute;
+    left: var(--gutter);
+    bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--font-en);
+    font-size: var(--fs-label);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-slate);
+  }
+
+  .hero__scroll-bar {
+    position: relative;
+    width: 64px;
+    height: 1px;
+    overflow: hidden;
+    background: rgb(91 107 128 / 0.3);
+  }
+
+  .hero__scroll-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-deep-navy);
+    transform: translateX(-100%);
+  }
+
+  /* 最初の表示アニメーション（CSSのみ。動きを減らす設定では実行しない） */
+  :global(.motion-ok) .hero__copy-text {
+    transform: translateY(110%);
+    animation: hero-rise 1.2s var(--ease-out) forwards;
+    animation-delay: calc(0.25s + var(--i) * 0.16s);
+  }
+
+  :global(.motion-ok) .hero__line {
+    transform: scaleX(0);
+    animation: hero-draw 1.8s var(--ease-out) 0.5s forwards;
+  }
+
+  :global(.motion-ok) .hero__dot {
+    opacity: 0;
+    transform: scale(0);
+    animation: hero-pop 0.7s var(--ease-out) forwards;
+    animation-delay: calc(0.6s + var(--d) * 0.35s);
+  }
+
+  :global(.motion-ok) .hero__sub {
+    opacity: 0;
+    animation: hero-fade 1s var(--ease-out) 1.3s forwards;
+  }
+
+  :global(.motion-ok) .hero__scroll-bar::after {
+    animation: hero-scroll 2.4s var(--ease-out) 2s infinite;
+  }
+
+  @keyframes hero-rise {
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes hero-draw {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes hero-pop {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes hero-fade {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes hero-scroll {
+    0% {
+      transform: translateX(-100%);
+    }
+    60%,
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* =========================================================
+     Statement
+     ========================================================= */
+  .statement {
+    padding-block: var(--section-space);
+    background: var(--color-paper);
+  }
+
+  .statement__heading {
+    margin-top: 32px;
+    font-size: var(--fs-h2);
+    line-height: 1.6;
+  }
+
+  .statement__line {
+    display: block;
+  }
+
+  .statement__body {
+    max-width: 40em;
+    margin-top: clamp(32px, 4vw, 48px);
+    font-size: var(--fs-lead);
+    line-height: 2.1;
+    color: var(--color-slate);
+  }
+
+  @media (min-width: 768px) {
+    .statement__body-line {
+      display: block;
+    }
+  }
+
+  /* =========================================================
+     Connection
+     （初期状態は「動きなし」の静止表示。motion-ok のときだけ固定スクロール演出用のレイアウトにする）
+     ========================================================= */
+  .connection {
+    position: relative;
+    background: var(--color-deep-navy);
+    color: var(--color-white);
+  }
+
+  .connection__stage {
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--section-space) 0;
+  }
+
+  .connection__text {
+    position: relative;
+    z-index: 1;
+  }
+
+  .connection__meta {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .connection__label {
+    color: var(--color-horizon);
+    font-size: var(--fs-label);
+    line-height: 1.4;
+  }
+
+  .connection__counter {
+    display: none;
+    font-family: var(--font-en);
+    font-size: var(--fs-small);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.1em;
+    color: rgb(255 255 255 / 0.5);
+  }
+
+  .connection__phrases {
+    display: grid;
+    gap: 28px;
+    margin-top: 40px;
+  }
+
+  .connection__phrase {
+    display: grid;
+    gap: 6px;
+  }
+
+  .connection__ja {
+    font-size: clamp(1.5rem, 4.4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+  }
+
+  .connection__en {
+    font-family: var(--font-en);
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 500;
+    color: var(--color-horizon);
+  }
+
+  .connection__progress {
+    display: none;
+  }
+
+  .connection__visual {
+    position: relative;
+    aspect-ratio: 1200 / 520;
+    margin-top: 24px;
+  }
+
+  /* slice：枠いっぱいに広げ、はみ出した線は画面の外へ抜けていく */
+  .connection__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+  }
+
+  .connection__horizon {
+    stroke: var(--color-horizon);
+    stroke-width: 1;
+    opacity: 0.18;
+  }
+
+  .edge {
+    stroke: var(--color-horizon);
+    stroke-width: 1.5;
+    opacity: 0.9;
+  }
+
+  .edge--world {
+    stroke: url(#world-line);
+  }
+
+  .node__halo {
+    fill: var(--color-horizon);
+    opacity: 0.2;
+  }
+
+  .node__core {
+    fill: var(--color-white);
+  }
+
+  .spark {
+    fill: var(--color-white);
+    opacity: 0.6;
+  }
+
+  .flow {
+    stroke: var(--color-white);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0;
+  }
+
+  /* --- 動きありのとき：画面に固定して1行ずつ切り替える --- */
+  :global(.motion-ok) .connection__stage {
+    height: 100vh;
+    height: 100svh;
+    padding-block: calc(var(--header-height) + clamp(24px, 6vh, 72px)) 0;
+  }
+
+  :global(.motion-ok) .connection__counter {
+    display: block;
+  }
+
+  :global(.motion-ok) .connection__phrases {
+    gap: 0;
+    margin-top: clamp(24px, 4vh, 40px);
+  }
+
+  :global(.motion-ok) .connection__phrase {
+    grid-area: 1 / 1;
+    opacity: 0;
+  }
+
+  :global(.motion-ok) .connection__phrase:first-child {
+    opacity: 1;
+  }
+
+  :global(.motion-ok) .connection__progress {
+    display: block;
+    width: min(240px, 50%);
+    height: 1px;
+    margin-top: clamp(20px, 4vh, 36px);
+    background: rgb(255 255 255 / 0.16);
+  }
+
+  :global(.motion-ok) .connection__progress-bar {
+    display: block;
+    height: 100%;
+    background: var(--color-horizon);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  :global(.motion-ok) .connection__visual {
+    position: absolute;
+    inset: auto 0 0;
+    height: 56%;
+    aspect-ratio: auto;
+    margin: 0;
+  }
+
+  /* スマホ：図を画面より大きく表示し、スクロールに合わせて右へ送る（top-animations.ts） */
+  @media (max-width: 767px) {
+    :global(.motion-ok) .connection__visual {
+      height: 60%;
+    }
+
+    :global(.motion-ok) .connection__svg {
+      right: auto;
+      width: auto;
+      aspect-ratio: 1200 / 520;
+    }
+  }
+
+  @media (min-width: 768px) {
+    :global(.motion-ok) .connection__visual {
+      height: 62%;
+    }
+  }
+
+  /* =========================================================
+     For You
+     ========================================================= */
+  .foryou {
+    padding-block: var(--section-space);
+    background: var(--color-paper);
+  }
+
+  .foryou__inner {
+    display: grid;
+    gap: 48px;
+  }
+
+  @media (min-width: 1024px) {
+    .foryou__inner {
+      grid-template-columns: 5fr 7fr;
+      gap: 64px;
+      align-items: start;
+    }
+
+    .foryou__head {
+      position: sticky;
+      top: calc(var(--header-height) + 48px);
+    }
+  }
+
+  .foryou__heading {
+    margin-top: 24px;
+    font-size: var(--fs-h2);
+  }
+
+  .foryou__list {
+    position: relative;
+  }
+
+  .foryou__track {
+    position: absolute;
+    top: 36px;
+    bottom: 36px;
+    left: 5px;
+    width: 1px;
+    background: rgb(14 23 38 / 0.12);
+  }
+
+  .foryou__track-fill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--color-blue);
+    transform-origin: top;
+  }
+
+  .foryou__item {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 28px;
+    padding-block: 22px;
+    font-size: var(--fs-lead);
+    font-weight: 500;
+    line-height: 1.7;
+  }
+
+  .foryou__dot {
+    position: relative;
+    top: -0.1em;
+    flex-shrink: 0;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-blue);
+    background: var(--color-blue);
+    transition:
+      background-color 0.4s var(--ease-out),
+      box-shadow 0.4s var(--ease-out);
+  }
+
+  :global(.motion-ok) .foryou__item:not(.is-active) .foryou__dot {
+    background: var(--color-paper);
+  }
+
+  :global(.motion-ok) .foryou__item.is-active .foryou__dot {
+    box-shadow: 0 0 0 6px rgb(36 86 240 / 0.12);
+  }
+
+  .foryou__closing {
+    margin-top: clamp(48px, 6vw, 80px);
+    font-size: var(--fs-h3);
+    font-weight: 700;
+    line-height: 1.8;
+  }
+
+  .foryou__closing-line {
+    display: block;
+  }
+
+  .foryou__closing-line:last-child {
+    color: var(--color-blue);
+  }
+
+  /* =========================================================
+     What We Do
+     ========================================================= */
+  .wwd {
+    padding-block: var(--section-space);
+    background: var(--color-white);
+    overflow: hidden;
+  }
+
+  .wwd__heading {
+    margin-top: 24px;
+    font-size: var(--fs-h1);
+    line-height: 1.3;
+  }
+
+  .wwd__lead {
+    margin-top: 24px;
+    font-size: var(--fs-lead);
+    color: var(--color-slate);
+  }
+
+  .wwd__track {
+    position: relative;
+    margin-top: clamp(56px, 7vw, 96px);
+  }
+
+  .wwd__rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 5px;
+    width: 1px;
+    background: rgb(14 23 38 / 0.1);
+  }
+
+  .wwd__rail-fill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, var(--color-blue), var(--color-horizon));
+    transform-origin: top;
+  }
+
+  .wwd__list {
+    display: grid;
+    gap: 48px;
+  }
+
+  .wwd__item {
+    position: relative;
+    padding-left: 40px;
+  }
+
+  .wwd__dot {
+    position: absolute;
+    top: 0.6em;
+    left: 0;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    box-shadow: 0 0 0 6px rgb(36 86 240 / 0.12);
+  }
+
+  .wwd__en {
+    font-family: var(--font-en);
+    font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-blue);
+  }
+
+  .wwd__name {
+    margin-top: 16px;
+    font-size: var(--fs-small);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--color-slate);
+  }
+
+  .wwd__copy {
+    margin-top: 12px;
+    font-size: var(--fs-h3);
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .wwd__text {
+    margin-top: 12px;
+    font-size: var(--fs-small);
+    line-height: 1.9;
+    color: var(--color-slate);
+  }
+
+  /* PC：横一列に並べ、線が画面の外まで続く */
+  @media (min-width: 1024px) {
+    .wwd__rail {
+      top: 5px;
+      bottom: auto;
+      left: 0;
+      width: 100vw;
+      height: 1px;
+    }
+
+    .wwd__rail-fill {
+      background: linear-gradient(90deg, var(--color-blue), var(--color-horizon) 60%, var(--color-mist));
+      transform-origin: left;
+    }
+
+    .wwd__list {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+    }
+
+    .wwd__item {
+      padding-left: 0;
+      padding-top: 48px;
+    }
+
+    .wwd__dot {
+      top: 0;
+    }
+  }
+
+  .wwd__more {
+    margin-top: clamp(56px, 7vw, 88px);
+  }
+</style>

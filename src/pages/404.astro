@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ButtonLink from '../components/ButtonLink.astro';
+---
+
+<BaseLayout title="ページが見つかりません" noindex>
+  <section class="not-found">
+    <div class="container">
+      <p class="label">404 Not Found</p>
+      <h1 class="not-found__title">ページが見つかりません。</h1>
+      <p class="not-found__text">お探しのページは移動または削除された可能性があります。</p>
+      <ButtonLink href="/" variant="outline">トップページへ戻る</ButtonLink>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    min-height: 70vh;
+    min-height: 70svh;
+    display: flex;
+    align-items: center;
+    padding-block: calc(var(--header-height) + 64px) 96px;
+  }
+
+  .not-found__title {
+    margin-top: 20px;
+    font-size: var(--fs-h1);
+  }
+
+  .not-found__text {
+    margin-block: 24px 40px;
+    color: var(--color-slate);
+  }
+</style>

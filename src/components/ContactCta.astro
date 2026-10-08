@@ -1,0 +1,88 @@
+---
+/** 各ページ下部の「お問い合わせ」への誘導。水平線のグラデーションで締める。 */
+import ButtonLink from './ButtonLink.astro';
+import { contactCta } from '../data/top';
+import { contactNav } from '../data/site';
+---
+
+<section class="cta" aria-labelledby="cta-heading" data-cta data-header-dark>
+  <div class="cta__horizon" aria-hidden="true">
+    <span class="cta__line" data-cta-line></span>
+  </div>
+  <div class="container cta__inner">
+    <p class="cta__label">{contactCta.label}</p>
+    <h2 id="cta-heading" class="cta__heading">
+      {contactCta.heading.map((line) => <span class="cta__heading-line">{line}</span>)}
+    </h2>
+    <p class="cta__body">
+      {contactCta.body.map((line) => <span class="cta__body-line">{line}</span>)}
+    </p>
+    <ButtonLink href={contactNav.href} variant="light">{contactCta.button}</ButtonLink>
+  </div>
+</section>
+
+<style>
+  .cta {
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--section-space);
+    background:
+      radial-gradient(120% 80% at 100% 100%, rgb(111 168 255 / 0.45) 0%, transparent 60%),
+      linear-gradient(160deg, var(--color-navy) 0%, var(--color-blue) 70%, var(--color-horizon) 130%);
+    color: var(--color-white);
+  }
+
+  .cta__horizon {
+    position: absolute;
+    inset: auto 0 clamp(40px, 7vw, 96px) 0;
+    height: 1px;
+  }
+
+  .cta__line {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.9) 30%, rgb(255 255 255 / 0.9));
+    transform-origin: left;
+  }
+
+  .cta__inner {
+    position: relative;
+  }
+
+  .cta__label {
+    font-family: var(--font-en);
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--color-mist);
+  }
+
+  .cta__heading {
+    margin-top: 20px;
+    font-size: var(--fs-h1);
+    line-height: 1.35;
+  }
+
+  .cta__heading-line {
+    display: block;
+  }
+
+  .cta__body {
+    margin-top: 28px;
+    margin-bottom: 44px;
+    font-size: var(--fs-lead);
+    line-height: 2;
+    color: rgb(255 255 255 / 0.88);
+  }
+
+  .cta__body-line {
+    display: block;
+  }
+
+  @media (max-width: 599px) {
+    .cta__body-line {
+      display: inline;
+    }
+  }
+</style>

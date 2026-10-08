@@ -1,0 +1,58 @@
+/*
+ * デザイントークン（配色・フォント・余白など）
+ * 色やフォントを変えるときは、このファイルだけを編集します。
+ * 配色は CLAUDE.md「決定事項」と同じ値です。
+ */
+
+:root {
+  /* ---- Color ---- */
+  --color-deep-navy: #0a1a33;
+  --color-navy: #13305e;
+  --color-blue: #2456f0; /* bull Blue */
+  --color-horizon: #6fa8ff; /* Horizon Blue */
+  --color-mist: #dce9f7; /* Mist Blue */
+  --color-paper: #f6f9fc; /* Paper White */
+  --color-white: #ffffff;
+  --color-ink: #0e1726;
+  --color-slate: #5b6b80;
+  --color-error: #d93a3a; /* フォームのエラー表示のみ */
+
+  --gradient-horizon: linear-gradient(
+    90deg,
+    var(--color-deep-navy) 0%,
+    var(--color-navy) 28%,
+    var(--color-blue) 55%,
+    var(--color-horizon) 80%,
+    var(--color-mist) 100%
+  );
+
+  /* ---- Typography ---- */
+  --font-ja: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo,
+    sans-serif;
+  --font-en: 'Inter Tight Variable', 'Inter Tight', 'Helvetica Neue', Arial, var(--font-ja);
+
+  --fs-display: clamp(2rem, 8.6vw, 6.4rem); /* TOPのメインコピー */
+  --fs-h1: clamp(2rem, 5.6vw, 4.5rem);
+  --fs-h2: clamp(1.6rem, 3.6vw, 2.8rem);
+  --fs-h3: clamp(1.15rem, 1.8vw, 1.45rem);
+  --fs-lead: clamp(1.05rem, 1.6vw, 1.3rem);
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-label: 0.75rem;
+
+  /* ---- Layout ---- */
+  --container: 1200px;
+  --gutter: clamp(20px, 5vw, 64px);
+  --section-space: clamp(96px, 16vw, 200px);
+  --header-height: 72px;
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration: 0.6s;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --header-height: 60px;
+  }
+}

@@ -1,0 +1,103 @@
+---
+/**
+ * 全ページ共通のレイアウト。<head>（SEO・フォント）、ヘッダー、フッターを含む。
+ */
+import '@fontsource/zen-kaku-gothic-new/400.css';
+import '@fontsource/zen-kaku-gothic-new/500.css';
+import '@fontsource/zen-kaku-gothic-new/700.css';
+import '@fontsource-variable/inter-tight/wght.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+import { company } from '../data/company';
+import { assets } from '../data/assets';
+
+interface Props {
+  /** ページ名。TOPでは省略する */
+  title?: string;
+  description?: string;
+  /** 検索結果に表示しないページ（送信完了、404など） */
+  noindex?: boolean;
+}
+
+const { title, description = site.description, noindex = false } = Astro.props;
+
+const fullTitle = title ? `${title} | ${site.name}` : `${site.name} | ${site.tagline}`;
+const siteUrl = site.url.replace(/\/$/, '');
+const canonical = siteUrl ? `${siteUrl}${Astro.url.pathname}` : undefined;
+const ogImage = assets.ogpImage && siteUrl ? `${siteUrl}${assets.ogpImage}` : undefined;
+const isTop = Astro.url.pathname === '/';
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: company.name,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: company.address,
+    addressCountry: 'JP',
+  },
+  ...(siteUrl ? { url: siteUrl } : {}),
+};
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+
+    <meta property="og:type" content={isTop ? 'website' : 'article'} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content={site.locale} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+
+    <meta name="theme-color" content="#f6f9fc" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- 動きを減らす設定でなければ、アニメーション用のクラスをつける（表示のちらつき防止のため最初に実行） -->
+    <script is:inline>
+      if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+        document.documentElement.classList.add('motion-ok');
+      }
+    </script>
+
+    {isTop && <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">本文へスキップ</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 200;
+    padding: 8px 16px;
+    background: var(--color-deep-navy);
+    color: var(--color-white);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+</style>

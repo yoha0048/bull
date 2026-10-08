@@ -1,0 +1,52 @@
+---
+/**
+ * 中身が未制作の下層ページ用の仮表示。
+ * 各ページを制作するときに、この部品を外して本来のセクションに置き換える。
+ */
+interface Props {
+  labelEn: string;
+  title: string;
+}
+
+const { labelEn, title } = Astro.props;
+---
+
+<section class="placeholder">
+  <div class="container">
+    <p class="label">{labelEn}</p>
+    <h1 class="placeholder__title">{title}</h1>
+    <p class="placeholder__note">このページは現在準備中です。</p>
+  </div>
+  <span class="placeholder__line" aria-hidden="true"></span>
+</section>
+
+<style>
+  .placeholder {
+    position: relative;
+    overflow: hidden;
+    min-height: 70vh;
+    min-height: 70svh;
+    display: flex;
+    align-items: center;
+    padding-block: calc(var(--header-height) + 64px) 96px;
+  }
+
+  .placeholder__title {
+    margin-top: 20px;
+    font-size: var(--fs-h1);
+  }
+
+  .placeholder__note {
+    margin-top: 24px;
+    color: var(--color-slate);
+  }
+
+  .placeholder__line {
+    position: absolute;
+    left: var(--gutter);
+    right: 0;
+    bottom: 64px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-blue), var(--color-mist));
+  }
+</style>
