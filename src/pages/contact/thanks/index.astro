@@ -1,8 +1,207 @@
 ---
+/**
+ * 送信完了ページ。検索結果に表示しない（noindex）。
+ */
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import PagePlaceholder from '../../../components/PagePlaceholder.astro';
+import ButtonLink from '../../../components/ButtonLink.astro';
+import Value from '../../../components/Value.astro';
+import { contactPage, thanksPage } from '../../../data/contactForm';
 ---
 
-<BaseLayout title="送信完了" noindex>
-  <PagePlaceholder labelEn="Thank you" title="送信完了" />
+<BaseLayout title="送信完了" description="お問い合わせの送信が完了しました。" noindex>
+  <section class="thanks" aria-labelledby="thanks-heading">
+    <div class="container thanks__inner">
+      <p class="label">{thanksPage.labelEn}</p>
+      <h1 id="thanks-heading" class="thanks__title">
+        {
+          thanksPage.title.map((line, i) => (
+            <span class="thanks__line">
+              <span class="thanks__text" style={`--i:${i}`}>
+                {line}
+              </span>
+            </span>
+          ))
+        }
+      </h1>
+
+      <div class="thanks__body">
+        {thanksPage.body.map((p) => <p>{p}</p>)}
+      </div>
+
+      <dl class="thanks__info">
+        <div>
+          <dt>返信の目安</dt>
+          <dd><Value value={contactPage.replyEstimate} /></dd>
+        </div>
+      </dl>
+
+      <p class="thanks__note">{thanksPage.noMailNote}</p>
+
+      <div class="thanks__actions">
+        <ButtonLink href="/" variant="primary">TOPへ戻る</ButtonLink>
+      </div>
+    </div>
+
+    <div class="thanks__horizon" aria-hidden="true">
+      <span class="thanks__rule"></span>
+      <span class="thanks__dot thanks__dot--a"></span>
+      <span class="thanks__dot thanks__dot--b"></span>
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .thanks {
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding-block: calc(var(--header-height) + clamp(56px, 10vw, 120px)) clamp(120px, 14vw, 180px);
+    background:
+      radial-gradient(60% 70% at 95% 10%, rgb(220 233 247 / 0.95) 0%, transparent 70%),
+      var(--color-paper);
+  }
+
+  .thanks__title {
+    margin-top: 24px;
+    font-size: var(--fs-h1);
+    line-height: 1.35;
+    color: var(--color-deep-navy);
+  }
+
+  .thanks__line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+  }
+
+  .thanks__text {
+    display: inline-block;
+  }
+
+  .thanks__body {
+    display: grid;
+    gap: 0.4em;
+    max-width: 40em;
+    margin-top: clamp(28px, 4vw, 44px);
+    font-size: var(--fs-lead);
+    line-height: 2;
+  }
+
+  .thanks__info {
+    display: inline-block;
+    margin: 32px 0 0;
+    padding: 16px 24px;
+    border-radius: 12px;
+    background: var(--color-white);
+  }
+
+  .thanks__info div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+
+  .thanks__info dt {
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--color-slate);
+  }
+
+  .thanks__info dd {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .thanks__note {
+    max-width: 40em;
+    margin-top: 28px;
+    font-size: var(--fs-small);
+    line-height: 1.9;
+    color: var(--color-slate);
+  }
+
+  .thanks__actions {
+    margin-top: 44px;
+  }
+
+  /* 2つの点が線で結ばれ、画面の外へ続く */
+  .thanks__horizon {
+    position: absolute;
+    left: var(--gutter);
+    right: 0;
+    bottom: clamp(48px, 7vw, 80px);
+    height: 12px;
+  }
+
+  @media (min-width: 1328px) {
+    .thanks__horizon {
+      left: calc((100vw - var(--container)) / 2);
+    }
+  }
+
+  .thanks__rule {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-blue), var(--color-horizon) 50%, var(--color-mist));
+    transform-origin: left;
+  }
+
+  .thanks__dot {
+    position: absolute;
+    top: 50%;
+    width: 11px;
+    height: 11px;
+    margin-top: -5.5px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    box-shadow: 0 0 0 6px rgb(36 86 240 / 0.12);
+  }
+
+  .thanks__dot--a {
+    left: 0;
+  }
+
+  .thanks__dot--b {
+    left: 38%;
+  }
+
+  :global(.motion-ok) .thanks__text {
+    transform: translateY(110%);
+    animation: thanks-rise 1.1s var(--ease-out) forwards;
+    animation-delay: calc(0.15s + var(--i) * 0.14s);
+  }
+
+  :global(.motion-ok) .thanks__rule {
+    transform: scaleX(0);
+    animation: thanks-draw 1.8s var(--ease-out) 0.5s forwards;
+  }
+
+  :global(.motion-ok) .thanks__dot--b {
+    opacity: 0;
+    transform: scale(0);
+    animation: thanks-pop 0.7s var(--ease-out) 1.2s forwards;
+  }
+
+  @keyframes thanks-rise {
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes thanks-draw {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes thanks-pop {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+</style>

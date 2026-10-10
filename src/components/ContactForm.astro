@@ -1,0 +1,499 @@
+---
+/**
+ * お問い合わせフォーム。送信先はGoogleフォーム（設定は src/data/contactForm.ts）。
+ * JavaScriptが動く環境では、入力チェックのあとGoogleフォームへ送信し、サイト内の送信完了ページへ移動する。
+ */
+import { categories, fields, googleForm, isGoogleFormConfigured } from '../data/contactForm';
+import { privacyNav } from '../data/site';
+
+const nameOf = (key: keyof typeof googleForm.entries) => googleForm.entries[key] || `field-${key}`;
+---
+
+<form
+  class="cform"
+  action={isGoogleFormConfigured ? googleForm.actionUrl : undefined}
+  method="post"
+  novalidate
+  data-contact-form
+>
+  {
+    !isGoogleFormConfigured && (
+      <p class="cform__setup" role="note">
+        【制作中の表示】Googleフォームの送信先がまだ設定されていないため、送信できません。設定方法は
+        docs/form-setup.md を参照してください。
+      </p>
+    )
+  }
+
+  <div class="cform__summary" role="alert" tabindex="-1" hidden data-form-summary></div>
+
+  {
+    fields.map((field) => {
+      const id = `contact-${field.key}`;
+      const errorId = `${id}-error`;
+      const noteId = `${id}-note`;
+      const describedBy = [field.note ? noteId : '', errorId].filter(Boolean).join(' ');
+      const badge = (
+        <span class:list={['cform__badge', { 'cform__badge--optional': !field.required }]}>
+          {field.required ? '必須' : '任意'}
+        </span>
+      );
+
+      if (field.type === 'radio') {
+        return (
+          <fieldset
+            class="cform__field cform__field--radio"
+            data-field={field.key}
+            data-required={field.required ? '' : undefined}
+            aria-describedby={errorId}
+          >
+            <legend class="cform__label">
+              {field.label}
+              {badge}
+            </legend>
+            <div class="cform__chips">
+              {categories.map((category, i) => (
+                <label class="cform__chip">
+                  <input
+                    type="radio"
+                    id={i === 0 ? id : undefined}
+                    name={nameOf(field.key)}
+                    value={category}
+                    required={field.required && i === 0}
+                    data-input={field.key}
+                  />
+                  <span>{category}</span>
+                </label>
+              ))}
+            </div>
+            <p class="cform__error" id={errorId} data-error-for={field.key} />
+          </fieldset>
+        );
+      }
+
+      return (
+        <div class="cform__field" data-field={field.key}>
+          <label class="cform__label" for={id}>
+            {field.label}
+            {badge}
+          </label>
+          {field.type === 'textarea' ? (
+            <textarea
+              id={id}
+              name={nameOf(field.key)}
+              rows="8"
+              required={field.required}
+              maxlength={field.maxLength}
+              placeholder={field.placeholder}
+              aria-describedby={describedBy}
+              data-input={field.key}
+            />
+          ) : (
+            <input
+              id={id}
+              type={field.type}
+              name={nameOf(field.key)}
+              required={field.required}
+              maxlength={field.maxLength}
+              autocomplete={field.autocomplete}
+              placeholder={field.placeholder}
+              inputmode={field.type === 'tel' ? 'tel' : field.type === 'email' ? 'email' : undefined}
+              aria-describedby={describedBy}
+              data-input={field.key}
+            />
+          )}
+          {field.note && (
+            <p class="cform__note" id={noteId}>
+              {field.note}
+            </p>
+          )}
+          <p class="cform__error" id={errorId} data-error-for={field.key} />
+        </div>
+      );
+    })
+  }
+
+  <!-- スパム対策：人には見えない入力欄。ここに入力があれば機械的な送信とみなす（Googleフォームには送らない） -->
+  <div class="cform__trap" aria-hidden="true">
+    <label for="contact-website">このフィールドは空のままにしてください</label>
+    <input id="contact-website" type="text" name="website" tabindex="-1" autocomplete="off" data-honeypot />
+  </div>
+
+  <div class="cform__field cform__field--agree" data-field="agree">
+    <label class="cform__agree">
+      <input
+        id="contact-agree"
+        type="checkbox"
+        required
+        data-input="agree"
+        aria-describedby="contact-agree-error"
+      />
+      <span class="cform__check" aria-hidden="true"></span>
+      <span>
+        <a href={privacyNav.href} target="_blank" rel="noopener">{privacyNav.label}<span class="visually-hidden">（新しいタブで開きます）</span></a>に同意する
+        <span class="cform__badge">必須</span>
+      </span>
+    </label>
+    <p class="cform__error" id="contact-agree-error" data-error-for="agree"></p>
+  </div>
+
+  <div class="cform__actions">
+    <button type="submit" class="cform__submit" data-submit>
+      <span data-submit-label>入力内容を送信する</span>
+      <span class="cform__submit-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6"></path></svg>
+      </span>
+    </button>
+    <p class="cform__status" role="status" aria-live="polite" data-form-status></p>
+  </div>
+</form>
+
+<script>
+  import { initContactForm } from '../scripts/contact-form';
+  initContactForm();
+</script>
+
+<style>
+  .cform {
+    display: grid;
+    gap: 32px;
+  }
+
+  .cform__setup {
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px dashed var(--color-error);
+    color: var(--color-error);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+  }
+
+  .cform__summary {
+    padding: 20px 24px;
+    border-radius: 12px;
+    background: rgb(217 58 58 / 0.07);
+    border-left: 3px solid var(--color-error);
+    color: var(--color-ink);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+  }
+
+  .cform__summary:focus {
+    outline: none;
+  }
+
+  .cform__summary :global(strong) {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--color-error);
+  }
+
+  .cform__summary :global(ul) {
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+
+  .cform__summary :global(a) {
+    text-decoration: underline;
+  }
+
+  .cform__field {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .cform__label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .cform__badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--color-blue);
+    color: var(--color-white);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    vertical-align: middle;
+  }
+
+  .cform__badge--optional {
+    background: transparent;
+    border: 1px solid rgb(91 107 128 / 0.5);
+    color: var(--color-slate);
+  }
+
+  .cform input[type='text'],
+  .cform input[type='email'],
+  .cform input[type='tel'],
+  .cform textarea {
+    width: 100%;
+    padding: 16px 18px;
+    border: 1px solid rgb(14 23 38 / 0.16);
+    border-radius: 10px;
+    background: var(--color-white);
+    color: var(--color-ink);
+    font: inherit;
+    font-size: 1rem; /* iOSで入力時に拡大されないよう16px以上 */
+    line-height: 1.6;
+    transition:
+      border-color 0.3s,
+      box-shadow 0.3s;
+  }
+
+  .cform textarea {
+    resize: vertical;
+    min-height: 200px;
+  }
+
+  .cform input::placeholder,
+  .cform textarea::placeholder {
+    color: rgb(91 107 128 / 0.65);
+  }
+
+  .cform input:focus,
+  .cform textarea:focus {
+    outline: none;
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 4px rgb(36 86 240 / 0.14);
+  }
+
+  .cform input[aria-invalid='true'],
+  .cform textarea[aria-invalid='true'] {
+    border-color: var(--color-error) !important;
+    background: rgb(217 58 58 / 0.03) !important;
+  }
+
+  .cform__note {
+    font-size: var(--fs-label);
+    color: var(--color-slate);
+    line-height: 1.7;
+  }
+
+  .cform__error {
+    font-size: var(--fs-small);
+    font-weight: 500;
+    color: var(--color-error);
+    line-height: 1.6;
+  }
+
+  .cform__error:empty {
+    display: none;
+  }
+
+  /* カテゴリ（ラジオボタンをチップ状に） */
+  .cform__field--radio legend {
+    margin-bottom: 10px;
+  }
+
+  .cform__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .cform__chip {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .cform__chip input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .cform__chip span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 1px solid rgb(14 23 38 / 0.16);
+    border-radius: 999px;
+    background: var(--color-white);
+    font-size: var(--fs-small);
+    font-weight: 500;
+    line-height: 1.4;
+    transition:
+      background-color 0.25s,
+      border-color 0.25s,
+      color 0.25s;
+  }
+
+  .cform__chip:hover span {
+    border-color: var(--color-blue);
+  }
+
+  .cform__chip input:checked + span {
+    background: var(--color-blue);
+    border-color: var(--color-blue);
+    color: var(--color-white);
+  }
+
+  .cform__chip input:focus-visible + span {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 3px;
+  }
+
+  .cform__field--radio[aria-invalid='true'] .cform__chip span {
+    border-color: rgb(217 58 58 / 0.6);
+  }
+
+  /* 同意チェック */
+  .cform__field--agree {
+    padding-top: 8px;
+    border-top: 1px solid rgb(14 23 38 / 0.1);
+  }
+
+  .cform__agree {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 24px;
+    cursor: pointer;
+    line-height: 1.7;
+  }
+
+  .cform__agree input {
+    position: absolute;
+    opacity: 0;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+  }
+
+  .cform__check {
+    position: relative;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border: 1.5px solid rgb(14 23 38 / 0.3);
+    border-radius: 6px;
+    background: var(--color-white);
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+  }
+
+  .cform__agree input:checked + .cform__check {
+    background: var(--color-blue);
+    border-color: var(--color-blue);
+  }
+
+  .cform__agree input:checked + .cform__check::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 11px;
+    border: solid var(--color-white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .cform__agree input:focus-visible + .cform__check {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 3px;
+  }
+
+  .cform__agree input[aria-invalid='true'] + .cform__check {
+    border-color: var(--color-error);
+  }
+
+  .cform__agree a {
+    color: var(--color-blue);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* 送信ボタン */
+  .cform__actions {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+  }
+
+  .cform__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.25em;
+    min-height: 64px;
+    padding: 0.9em 1.1em 0.9em 2em;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-blue);
+    color: var(--color-white);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background-color 0.4s var(--ease-out);
+  }
+
+  .cform__submit:hover {
+    background: var(--color-deep-navy);
+  }
+
+  .cform__submit:disabled {
+    background: var(--color-slate);
+    cursor: progress;
+  }
+
+  .cform__submit-arrow {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-white);
+    color: var(--color-blue);
+    transition: transform 0.4s var(--ease-out);
+  }
+
+  .cform__submit:hover .cform__submit-arrow {
+    transform: translateX(4px);
+  }
+
+  .cform__status {
+    font-size: var(--fs-small);
+    color: var(--color-slate);
+  }
+
+  .cform__status:empty {
+    display: none;
+  }
+
+  /* ハニーポット（画面外に置き、人には見えない） */
+  .cform__trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 599px) {
+    .cform__submit {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .cform__actions {
+      justify-items: stretch;
+    }
+  }
+</style>

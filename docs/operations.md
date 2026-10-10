@@ -46,6 +46,11 @@ public/
 2. リポジトリの Settings → Pages → Source を「GitHub Actions」にする
 3. 以後は `main` ブランチに push すると自動で公開される
 
+## お問い合わせフォーム
+
+- 設定手順は [form-setup.md](./form-setup.md)、メール送信のコードは [google-apps-script.gs](./google-apps-script.gs)
+- 送信先URL・項目IDは `src/data/contactForm.ts` の `googleForm` だけを書き換える
+
 ## アニメーションについて
 
 - TOPのスクロール演出は `src/scripts/top-animations.ts`、最初の表示アニメーションは `src/pages/index.astro` のCSSにある

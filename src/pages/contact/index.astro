@@ -1,8 +1,144 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
+import PageHero from '../../components/PageHero.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import Value from '../../components/Value.astro';
+import { categories, contactPage } from '../../data/contactForm';
 ---
 
-<BaseLayout title="お問い合わせ">
-  <PagePlaceholder labelEn="Contact" title="お問い合わせ" />
+<BaseLayout
+  title="お問い合わせ"
+  description="株式会社bullへのお問い合わせ・ご相談はこちらから。営業支援、販路拡大、海外ビジネス、ビジネスマッチングなど、まだかたちになっていないご相談も歓迎します。"
+>
+  <PageHero labelEn={contactPage.labelEn} title={contactPage.title} lead={contactPage.lead} />
+
+  <section class="contact" aria-label="お問い合わせフォーム">
+    <div class="container contact__inner">
+      <aside class="contact__side">
+        <p class="label">Topics</p>
+        <h2 class="contact__side-heading">こんなご相談を<br />お受けしています</h2>
+        <ul class="contact__topics">
+          {categories.filter((c) => c !== 'その他').map((c) => <li>{c.replace('について', '')}</li>)}
+        </ul>
+        <p class="contact__side-text">どれに当てはまるか分からないご相談は、「その他」からお送りください。</p>
+
+        <dl class="contact__info">
+          <div>
+            <dt>返信の目安</dt>
+            <dd><Value value={contactPage.replyEstimate} /></dd>
+          </div>
+        </dl>
+        <p class="contact__side-note">
+          送信後、ご入力のメールアドレスに受付完了の自動返信メールをお送りします。
+        </p>
+      </aside>
+
+      <div class="contact__form">
+        <ContactForm />
+      </div>
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .contact {
+    padding-block: clamp(56px, 8vw, 104px) var(--section-space);
+    background: var(--color-white);
+  }
+
+  .contact__inner {
+    display: grid;
+    gap: 56px;
+  }
+
+  @media (min-width: 1024px) {
+    .contact__inner {
+      grid-template-columns: 4fr 7fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .contact__side {
+      position: sticky;
+      top: calc(var(--header-height) + 40px);
+    }
+  }
+
+  .contact__side-heading {
+    margin-top: 20px;
+    font-size: var(--fs-h3);
+    line-height: 1.6;
+  }
+
+  .contact__topics {
+    display: grid;
+    gap: 2px;
+    margin-top: 24px;
+    padding-left: 18px;
+    border-left: 1px solid var(--color-horizon);
+  }
+
+  .contact__topics li {
+    position: relative;
+    padding-block: 6px;
+    font-weight: 500;
+  }
+
+  .contact__topics li::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -22.5px;
+    width: 9px;
+    height: 9px;
+    margin-top: -4.5px;
+    border-radius: 50%;
+    background: var(--color-blue);
+  }
+
+  .contact__side-text,
+  .contact__side-note {
+    margin-top: 20px;
+    font-size: var(--fs-small);
+    color: var(--color-slate);
+    line-height: 1.9;
+  }
+
+  .contact__info {
+    margin: 28px 0 0;
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: var(--color-paper);
+  }
+
+  .contact__info div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+
+  .contact__info dt {
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--color-slate);
+  }
+
+  .contact__info dd {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .contact__form {
+    padding: clamp(24px, 4vw, 56px);
+    border-radius: 24px;
+    background: var(--color-paper);
+  }
+
+  @media (max-width: 599px) {
+    .contact__form {
+      margin-inline: calc(var(--gutter) * -0.5);
+      padding: 28px 20px;
+      border-radius: 16px;
+    }
+  }
+</style>
