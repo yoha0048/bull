@@ -1,0 +1,155 @@
+---
+/**
+ * 下層ページ共通のヒーロー。TOPのHeroと同じ「水平線と点」のモチーフを使う。
+ */
+interface Props {
+  labelEn: string;
+  title: string[];
+  lead?: string[];
+}
+
+const { labelEn, title, lead = [] } = Astro.props;
+---
+
+<section class="page-hero">
+  <div class="container">
+    <p class="label page-hero__label">{labelEn}</p>
+    <h1 class="page-hero__title">
+      {
+        title.map((line, i) => (
+          <span class="page-hero__line">
+            <span class="page-hero__text" style={`--i:${i}`}>
+              {line}
+            </span>
+          </span>
+        ))
+      }
+    </h1>
+    {
+      lead.length > 0 && (
+        <p class="page-hero__lead">
+          {lead.map((line) => (
+            <span class="page-hero__lead-line">{line}</span>
+          ))}
+        </p>
+      )
+    }
+  </div>
+  <div class="page-hero__horizon" aria-hidden="true">
+    <span class="page-hero__rule"></span>
+    <span class="page-hero__dot"></span>
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: calc(var(--header-height) + clamp(56px, 10vw, 120px)) clamp(88px, 12vw, 140px);
+    background:
+      radial-gradient(60% 70% at 95% 10%, rgb(220 233 247 / 0.95) 0%, transparent 70%),
+      var(--color-paper);
+  }
+
+  .page-hero__title {
+    margin-top: clamp(20px, 3vw, 32px);
+    font-size: var(--fs-h1);
+    line-height: 1.3;
+    color: var(--color-deep-navy);
+  }
+
+  .page-hero__line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+  }
+
+  .page-hero__text {
+    display: inline-block;
+  }
+
+  .page-hero__lead {
+    margin-top: clamp(24px, 3vw, 36px);
+    font-size: var(--fs-lead);
+    line-height: 2;
+    color: var(--color-slate);
+  }
+
+  @media (min-width: 768px) {
+    .page-hero__lead-line {
+      display: block;
+    }
+  }
+
+  .page-hero__horizon {
+    position: absolute;
+    left: var(--gutter);
+    right: 0;
+    bottom: clamp(40px, 6vw, 64px);
+    height: 12px;
+  }
+
+  @media (min-width: 1328px) {
+    .page-hero__horizon {
+      left: calc((100vw - var(--container)) / 2);
+    }
+  }
+
+  .page-hero__rule {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-blue), var(--color-horizon) 60%, var(--color-mist));
+    transform-origin: left;
+  }
+
+  .page-hero__dot {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 11px;
+    height: 11px;
+    margin-top: -5.5px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    box-shadow: 0 0 0 6px rgb(36 86 240 / 0.12);
+  }
+
+  /* 最初の表示アニメーション（動きを減らす設定では実行しない） */
+  :global(.motion-ok) .page-hero__text {
+    transform: translateY(110%);
+    animation: page-hero-rise 1.1s var(--ease-out) forwards;
+    animation-delay: calc(0.15s + var(--i) * 0.14s);
+  }
+
+  :global(.motion-ok) .page-hero__rule {
+    transform: scaleX(0);
+    animation: page-hero-draw 1.6s var(--ease-out) 0.4s forwards;
+  }
+
+  :global(.motion-ok) .page-hero__lead,
+  :global(.motion-ok) .page-hero__dot {
+    opacity: 0;
+    animation: page-hero-fade 1s var(--ease-out) 0.7s forwards;
+  }
+
+  @keyframes page-hero-rise {
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes page-hero-draw {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes page-hero-fade {
+    to {
+      opacity: 1;
+    }
+  }
+</style>

@@ -141,6 +141,21 @@ button {
   color: var(--color-error);
 }
 
+/* 下層ページのフェードイン（src/scripts/fade-in.ts）。--fade-delay で順番にずらせる */
+.fade-ready [data-fade] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s var(--ease-out),
+    transform 0.9s var(--ease-out);
+  transition-delay: var(--fade-delay, 0s);
+}
+
+.fade-ready [data-fade].is-in {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

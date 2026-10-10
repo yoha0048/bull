@@ -1,8 +1,311 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
+import PageHero from '../../components/PageHero.astro';
+import Value from '../../components/Value.astro';
+import { company } from '../../data/company';
+import { site } from '../../data/site';
+import {
+  privacyAnalyticsOff,
+  privacyAnalyticsOn,
+  privacyContact,
+  privacyIntro,
+  privacyMeta,
+  privacySections,
+} from '../../data/privacy';
+
+const fill = (text: string) => text.replaceAll('{company}', company.name);
+
+// 「Cookie・アクセス解析」の章を「安全管理」の後に入れる
+const analytics = site.useGoogleAnalytics ? privacyAnalyticsOn : privacyAnalyticsOff;
+const securityIndex = privacySections.findIndex((s) => s.id === 'security');
+const sections = [
+  ...privacySections.slice(0, securityIndex + 1),
+  analytics,
+  ...privacySections.slice(securityIndex + 1),
+];
+const contactId = 'contact';
+const toc = [...sections.map((s) => ({ id: s.id, heading: s.heading })), { id: contactId, heading: 'お問い合わせ窓口' }];
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title="プライバシーポリシー">
-  <PagePlaceholder labelEn="Privacy Policy" title="プライバシーポリシー" />
+<BaseLayout
+  title="プライバシーポリシー"
+  description="株式会社bullのプライバシーポリシー。お問い合わせフォームで取得する個人情報の取り扱いについて掲載しています。"
+>
+  <PageHero labelEn="Privacy Policy" title={['プライバシーポリシー']} />
+
+  <div class="policy">
+    <div class="container policy__inner">
+      <nav class="policy__toc" aria-label="目次">
+        <p class="policy__toc-title">目次</p>
+        <ol>
+          {
+            toc.map((item, i) => (
+              <li>
+                <a href={`#${item.id}`}>
+                  <span class="policy__toc-num">{pad(i + 1)}</span>
+                  {item.heading}
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <article class="policy__body">
+        <p class="policy__intro">{fill(privacyIntro)}</p>
+
+        {
+          sections.map((section, i) => (
+            <section class="policy__section" id={section.id} aria-labelledby={`${section.id}-heading`}>
+              <h2 class="policy__heading" id={`${section.id}-heading`}>
+                <span class="policy__num">{pad(i + 1)}</span>
+                {section.heading}
+              </h2>
+              {section.paragraphs?.map((p) => (
+                <p>{fill(p)}</p>
+              ))}
+              {section.list && (
+                <ul class="policy__list">
+                  {section.list.map((item) => (
+                    <li>{fill(item)}</li>
+                  ))}
+                </ul>
+              )}
+              {section.afterList?.map((p) => (
+                <p>{fill(p)}</p>
+              ))}
+              {section.links && (
+                <ul class="policy__links">
+                  {section.links.map((link) => (
+                    <li>
+                      <a href={link.href} target="_blank" rel="noopener noreferrer">
+                        {link.label}
+                        <span class="visually-hidden">（新しいタブで開きます）</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))
+        }
+
+        <section class="policy__section" id={contactId} aria-labelledby={`${contactId}-heading`}>
+          <h2 class="policy__heading" id={`${contactId}-heading`}>
+            <span class="policy__num">{pad(sections.length + 1)}</span>
+            お問い合わせ窓口
+          </h2>
+          <p>本ポリシーおよび個人情報の取り扱いに関するお問い合わせは、下記までご連絡ください。</p>
+          <dl class="policy__contact">
+            <div>
+              <dt>事業者名</dt>
+              <dd>{company.name}</dd>
+            </div>
+            <div>
+              <dt>代表者</dt>
+              <dd>{company.representative}</dd>
+            </div>
+            <div>
+              <dt>所在地</dt>
+              <dd>
+                〒<Value value={company.postalCode} /> {company.address}
+              </dd>
+            </div>
+            <div>
+              <dt>担当部署</dt>
+              <dd><Value value={privacyContact.department} /></dd>
+            </div>
+            <div>
+              <dt>メールアドレス</dt>
+              <dd><Value value={privacyContact.email} /></dd>
+            </div>
+            <div>
+              <dt>電話番号</dt>
+              <dd><Value value={privacyContact.tel} /></dd>
+            </div>
+          </dl>
+        </section>
+
+        <p class="policy__dates">
+          制定日：<Value value={privacyMeta.enactedOn} />
+          {privacyMeta.revisedOn && <><br />最終改定日：{privacyMeta.revisedOn}</>}
+          <br />
+          {company.name}
+        </p>
+      </article>
+    </div>
+  </div>
 </BaseLayout>
+
+<style>
+  .policy {
+    padding-block: clamp(56px, 8vw, 104px) var(--section-space);
+    background: var(--color-white);
+  }
+
+  .policy__inner {
+    display: grid;
+    gap: 48px;
+  }
+
+  @media (min-width: 1024px) {
+    .policy__inner {
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 80px;
+      align-items: start;
+    }
+
+    .policy__toc {
+      position: sticky;
+      top: calc(var(--header-height) + 32px);
+    }
+  }
+
+  .policy__toc {
+    padding: 24px;
+    border-radius: 16px;
+    background: var(--color-paper);
+  }
+
+  .policy__toc-title {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--color-slate);
+  }
+
+  .policy__toc ol {
+    display: grid;
+    gap: 2px;
+    margin-top: 12px;
+  }
+
+  .policy__toc a {
+    display: flex;
+    gap: 12px;
+    padding-block: 6px;
+    font-size: var(--fs-small);
+    line-height: 1.6;
+    transition: color 0.3s;
+  }
+
+  .policy__toc a:hover {
+    color: var(--color-blue);
+  }
+
+  .policy__toc-num {
+    flex-shrink: 0;
+    font-family: var(--font-en);
+    color: var(--color-blue);
+  }
+
+  .policy__body {
+    max-width: 760px;
+    line-height: 2;
+  }
+
+  .policy__intro {
+    font-size: 1.05rem;
+  }
+
+  .policy__section {
+    margin-top: clamp(48px, 6vw, 72px);
+    scroll-margin-top: calc(var(--header-height) + 24px);
+  }
+
+  .policy__section > p + p {
+    margin-top: 1em;
+  }
+
+  .policy__heading {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgb(14 23 38 / 0.12);
+    font-size: var(--fs-h3);
+  }
+
+  .policy__num {
+    font-family: var(--font-en);
+    font-size: var(--fs-small);
+    font-weight: 600;
+    color: var(--color-blue);
+  }
+
+  .policy__list {
+    display: grid;
+    gap: 6px;
+    margin-block: 16px;
+    padding: 20px 24px;
+    border-radius: 12px;
+    background: var(--color-paper);
+  }
+
+  .policy__list li {
+    position: relative;
+    padding-left: 18px;
+  }
+
+  .policy__list li::before {
+    content: '';
+    position: absolute;
+    top: 0.85em;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-blue);
+  }
+
+  .policy__links {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .policy__links a {
+    color: var(--color-blue);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    word-break: break-all;
+  }
+
+  .policy__contact {
+    margin: 20px 0 0;
+    border-top: 1px solid rgb(14 23 38 / 0.12);
+  }
+
+  .policy__contact div {
+    display: grid;
+    gap: 2px;
+    padding-block: 14px;
+    border-bottom: 1px solid rgb(14 23 38 / 0.12);
+  }
+
+  @media (min-width: 600px) {
+    .policy__contact div {
+      grid-template-columns: 9em 1fr;
+      gap: 24px;
+    }
+  }
+
+  .policy__contact dt {
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--color-slate);
+  }
+
+  .policy__contact dd {
+    margin: 0;
+  }
+
+  .policy__dates {
+    margin-top: clamp(48px, 6vw, 72px);
+    text-align: right;
+    font-size: var(--fs-small);
+    color: var(--color-slate);
+  }
+</style>

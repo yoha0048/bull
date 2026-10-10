@@ -1,0 +1,12 @@
+---
+/** 値を表示する。【要入力】のときは目立つ色で表示する。 */
+import { isTBD } from '../data/company';
+
+interface Props {
+  value: string;
+}
+
+const { value } = Astro.props;
+---
+
+{isTBD(value) ? <span class="tbd">{value}</span> : value}

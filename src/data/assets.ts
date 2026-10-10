@@ -15,6 +15,8 @@ export const assets = {
   logo: '',
   /** フッター用ロゴ（濃紺背景用）例: '/images/logo/bull-logo-white.svg' */
   logoOnDark: '',
+  /** 会社概要の代表写真（縦4:横3程度）例: '/images/photos/representative.jpg'。空なら抽象グラフィックを表示 */
+  representativePhoto: '',
   /** OGP画像 例: '/images/ogp/ogp.png' */
   ogpImage: '',
 } as const;

@@ -1,8 +1,460 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
+import PageHero from '../../components/PageHero.astro';
+import ContactCta from '../../components/ContactCta.astro';
+import Value from '../../components/Value.astro';
+import { aboutHero, message, philosophy } from '../../data/about';
+import { company, isTBD, TBD } from '../../data/company';
+import { assets } from '../../data/assets';
+import { contactNav } from '../../data/site';
+
+// 役職名が未定の間は「代表」と表示する（要望書の表記「代表者」に合わせる）
+const representativeTitle = isTBD(company.representativeTitle) ? '代表' : company.representativeTitle;
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title="会社概要">
-  <PagePlaceholder labelEn="Company" title="会社概要" />
+<BaseLayout
+  title="会社概要"
+  description="株式会社bullの会社概要。理念「人とつながる、そして世界とつなぐ。」、代表メッセージ、会社情報を掲載しています。"
+>
+  <PageHero labelEn={aboutHero.labelEn} title={aboutHero.title} lead={aboutHero.lead} />
+
+  <!-- ========== Philosophy ========== -->
+  <section class="philosophy" aria-labelledby="philosophy-heading" data-header-dark>
+    <div class="container">
+      <p class="label philosophy__label" data-fade>{philosophy.label}</p>
+      <h2 id="philosophy-heading" class="philosophy__heading" data-fade>{philosophy.heading}</h2>
+      <p class="philosophy__lead" data-fade>{philosophy.lead}</p>
+
+      <ol class="pairs">
+        {
+          philosophy.pairs.map((pair, i) => (
+            <li class="pair" data-fade style={`--fade-delay:${i * 0.08}s`}>
+              <span class="pair__num">{pad(i + 1)}</span>
+              <span class="pair__link">
+                <span class="pair__word">{pair.from}</span>
+                <span class="pair__line" aria-hidden="true" />
+                <span class="pair__word">{pair.to}</span>
+              </span>
+              <span class="pair__text">{pair.text}</span>
+            </li>
+          ))
+        }
+      </ol>
+
+      <p class="philosophy__closing" data-fade>
+        {philosophy.closing.map((line) => <span class="philosophy__closing-line">{line}</span>)}
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== Message ========== -->
+  <section class="message" aria-labelledby="message-heading">
+    <div class="container message__inner">
+      <figure class="message__visual" data-fade>
+        {
+          assets.representativePhoto ? (
+            <img
+              src={assets.representativePhoto}
+              alt={`${representativeTitle} ${company.representative}`}
+              width="600"
+              height="800"
+              loading="lazy"
+            />
+          ) : (
+            <div class="message__placeholder" aria-hidden="true">
+              <span class="message__placeholder-line" />
+              <span class="message__placeholder-dot" />
+            </div>
+          )
+        }
+      </figure>
+
+      <div class="message__content">
+        <p class="label" data-fade>{message.label}</p>
+        <h2 id="message-heading" class="message__heading" data-fade>
+          {message.heading.map((line) => <span class="message__heading-line">{line}</span>)}
+        </h2>
+        <div class="message__body" data-fade>
+          {message.body.map((p) => <p>{p}</p>)}
+        </div>
+        <p class="message__sign" data-fade>
+          <span class="message__sign-company">{company.name}</span>
+          <span class="message__sign-title">{representativeTitle}</span>
+          <span class="message__sign-name">{company.representative}</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Company Profile ========== -->
+  <section class="profile" aria-labelledby="profile-heading">
+    <div class="container profile__inner">
+      <div class="profile__head">
+        <p class="label" data-fade>Company Profile</p>
+        <h2 id="profile-heading" class="profile__heading" data-fade>会社情報</h2>
+      </div>
+
+      <dl class="profile__table" data-fade>
+        <div class="profile__row">
+          <dt>会社名</dt>
+          <dd>{company.name}</dd>
+        </div>
+        <div class="profile__row">
+          <dt>代表者</dt>
+          <dd>
+            {!isTBD(company.representativeTitle) && <>{company.representativeTitle} </>}
+            {company.representative}
+          </dd>
+        </div>
+        <div class="profile__row">
+          <dt>所在地</dt>
+          <dd>
+            〒<Value value={company.postalCode} /><br />
+            {company.address}
+          </dd>
+        </div>
+        <div class="profile__row">
+          <dt>設立</dt>
+          <dd><Value value={company.established} /></dd>
+        </div>
+        <div class="profile__row">
+          <dt>資本金</dt>
+          <dd><Value value={company.capital} /></dd>
+        </div>
+        <div class="profile__row">
+          <dt>事業内容</dt>
+          <dd>
+            <ul class="profile__list">
+              {company.business.map((b) => <li>{b}</li>)}
+            </ul>
+          </dd>
+        </div>
+        <div class="profile__row">
+          <dt>お問い合わせ</dt>
+          <dd>
+            <a href={contactNav.href} class="profile__link">お問い合わせフォーム</a>
+            {company.email !== TBD && <><br />{company.email}</>}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <ContactCta />
 </BaseLayout>
+
+<style>
+  /* =========================================================
+     Philosophy
+     ========================================================= */
+  .philosophy {
+    padding-block: var(--section-space);
+    background: var(--color-deep-navy);
+    color: var(--color-white);
+    overflow: hidden;
+  }
+
+  .philosophy__label {
+    color: var(--color-horizon);
+  }
+
+  .philosophy__heading {
+    margin-top: 28px;
+    font-size: clamp(1.8rem, 6vw, 4.2rem);
+    line-height: 1.35;
+  }
+
+  .philosophy__lead {
+    margin-top: 28px;
+    font-size: var(--fs-lead);
+    color: rgb(255 255 255 / 0.75);
+  }
+
+  .pairs {
+    margin-top: clamp(48px, 7vw, 88px);
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+  }
+
+  .pair {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 20px;
+    align-items: center;
+    padding-block: 24px;
+    border-bottom: 1px solid rgb(255 255 255 / 0.14);
+  }
+
+  @media (min-width: 900px) {
+    .pair {
+      grid-template-columns: 56px minmax(300px, 5fr) 6fr;
+      gap: 32px;
+      padding-block: 32px;
+    }
+  }
+
+  .pair__num {
+    font-family: var(--font-en);
+    font-size: var(--fs-small);
+    color: rgb(255 255 255 / 0.45);
+  }
+
+  .pair__link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: clamp(1.3rem, 2.6vw, 2rem);
+    font-weight: 700;
+  }
+
+  .pair__line {
+    position: relative;
+    flex: 1;
+    max-width: 160px;
+    min-width: 40px;
+    height: 1px;
+    background: var(--color-horizon);
+  }
+
+  .pair__line::before,
+  .pair__line::after {
+    content: '';
+    position: absolute;
+    top: -3.5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-white);
+  }
+
+  .pair__line::before {
+    left: 0;
+  }
+
+  .pair__line::after {
+    right: 0;
+  }
+
+  .pair__text {
+    grid-column: 2;
+    color: rgb(255 255 255 / 0.78);
+  }
+
+  @media (min-width: 900px) {
+    .pair__text {
+      grid-column: auto;
+    }
+  }
+
+  /* 線が伸びる */
+  :global(.fade-ready) .pair__line {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.2s var(--ease-out) calc(var(--fade-delay, 0s) + 0.2s);
+  }
+
+  :global(.fade-ready) .pair.is-in .pair__line {
+    transform: none;
+  }
+
+  .philosophy__closing {
+    margin-top: clamp(48px, 6vw, 80px);
+    font-size: var(--fs-h3);
+    font-weight: 700;
+    line-height: 1.9;
+  }
+
+  .philosophy__closing-line {
+    display: block;
+  }
+
+  .philosophy__closing-line:last-child {
+    color: var(--color-horizon);
+  }
+
+  /* =========================================================
+     Message
+     ========================================================= */
+  .message {
+    padding-block: var(--section-space);
+    background: var(--color-paper);
+  }
+
+  .message__inner {
+    display: grid;
+    gap: 48px;
+  }
+
+  @media (min-width: 1024px) {
+    .message__inner {
+      grid-template-columns: 4fr 7fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .message__visual {
+      position: sticky;
+      top: calc(var(--header-height) + 40px);
+    }
+  }
+
+  .message__visual img,
+  .message__placeholder {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: 20px;
+    object-fit: cover;
+  }
+
+  @media (max-width: 1023px) {
+    .message__visual {
+      max-width: 240px;
+    }
+  }
+
+  /* 写真が届くまでの抽象グラフィック */
+  .message__placeholder {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(90% 60% at 80% 10%, rgb(111 168 255 / 0.55) 0%, transparent 70%),
+      linear-gradient(170deg, var(--color-navy) 0%, var(--color-deep-navy) 100%);
+  }
+
+  .message__placeholder-line {
+    position: absolute;
+    left: 14%;
+    right: 0;
+    top: 62%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-white), var(--color-horizon));
+  }
+
+  .message__placeholder-dot {
+    position: absolute;
+    left: 14%;
+    top: 62%;
+    width: 11px;
+    height: 11px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    background: var(--color-white);
+    box-shadow: 0 0 0 7px rgb(255 255 255 / 0.15);
+  }
+
+  .message__heading {
+    margin-top: 24px;
+    font-size: var(--fs-h2);
+    line-height: 1.5;
+  }
+
+  .message__heading-line {
+    display: block;
+  }
+
+  .message__body {
+    display: grid;
+    gap: 1.4em;
+    margin-top: clamp(28px, 4vw, 44px);
+    line-height: 2.1;
+  }
+
+  .message__sign {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 16px;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid rgb(14 23 38 / 0.1);
+  }
+
+  .message__sign-company,
+  .message__sign-title {
+    font-size: var(--fs-small);
+    color: var(--color-slate);
+  }
+
+  .message__sign-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  /* =========================================================
+     Company Profile
+     ========================================================= */
+  .profile {
+    padding-block: var(--section-space);
+    background: var(--color-white);
+  }
+
+  .profile__inner {
+    display: grid;
+    gap: 40px;
+  }
+
+  @media (min-width: 1024px) {
+    .profile__inner {
+      grid-template-columns: 4fr 7fr;
+      gap: 80px;
+    }
+  }
+
+  .profile__heading {
+    margin-top: 24px;
+    font-size: var(--fs-h2);
+  }
+
+  .profile__table {
+    margin: 0;
+    border-top: 1px solid var(--color-deep-navy);
+  }
+
+  .profile__row {
+    display: grid;
+    gap: 4px;
+    padding-block: 22px;
+    border-bottom: 1px solid rgb(14 23 38 / 0.12);
+  }
+
+  @media (min-width: 600px) {
+    .profile__row {
+      grid-template-columns: 9em 1fr;
+      gap: 24px;
+    }
+  }
+
+  .profile__row dt {
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--color-slate);
+  }
+
+  .profile__row dd {
+    margin: 0;
+    line-height: 1.9;
+  }
+
+  .profile__list {
+    display: grid;
+    gap: 2px;
+  }
+
+  .profile__list li::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 10px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    vertical-align: middle;
+  }
+
+  .profile__link {
+    color: var(--color-blue);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+</style>

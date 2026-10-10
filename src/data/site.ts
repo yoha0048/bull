@@ -17,6 +17,12 @@ export const site = {
   tagline: '人とつながる、そして世界とつなぐ。',
   taglineEn: 'From one connection, to the world.',
   locale: 'ja_JP',
+  /**
+   * Google Analytics を使うかどうか（2026-10-08 時点の決定：使わない）。
+   * true にすると、プライバシーポリシーに Google Analytics の条文が表示される。
+   * ※計測タグ自体は未実装。導入する場合は計測タグの追加も必要。
+   */
+  useGoogleAnalytics: false,
 } as const;
 
 export type NavItem = {
