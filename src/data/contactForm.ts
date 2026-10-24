@@ -4,7 +4,24 @@
  * ★ Googleフォームを作ったら、このファイルの googleForm だけを書き換えてください。
  *   調べ方は docs/form-setup.md の「2. 送信先URLと項目IDを調べて、サイトに反映する」を参照。
  */
-import { TBD } from './company';
+import { company, TBD } from './company';
+
+/**
+ * お問い合わせの受付方法。
+ * - 'tel'  … 電話での受付のみ（2026-10-24 決定。フォームは表示しない）
+ * - 'form' … サイト独自フォーム（送信先Googleフォーム）
+ * フォームを再開するときは 'form' に戻し、下の googleForm を設定する。
+ */
+export const contactMode: 'tel' | 'form' = 'tel';
+
+/** 電話受付の表示内容（contactMode が 'tel' のとき使用）。電話番号は company.tel */
+export const telContact = {
+  tel: company.tel,
+  /** 受付時間（例：'平日 10:00〜18:00'） */
+  hours: TBD,
+  /** 受付時間の補足（例：'土日祝・年末年始を除く'）。空なら表示しない */
+  hoursNote: '',
+};
 
 export const googleForm = {
   /**
@@ -114,6 +131,8 @@ export const contactPage = {
   lead: ['まだかたちになっていないご相談でも、歓迎します。', 'まずはお気軽にお聞かせください。'],
   /** 返信までの目安（例：'3営業日以内'）。お問い合わせページと送信完了ページに表示 */
   replyEstimate: TBD,
+  /** 電話受付時の補足文（案） */
+  telNote: 'お電話の際は、会社名・お名前と、ご相談の内容を簡単にお伝えください。',
 };
 
 export const thanksPage = {

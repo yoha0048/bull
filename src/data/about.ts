@@ -28,6 +28,8 @@ export const philosophy = {
  * 事実として書いているのは、要望書1章の「資産運用を目的として設立し、事業領域を広げてきた」点のみ。
  */
 export const message = {
+  /** 代表メッセージを表示するか（2026-10-24 非表示に決定。文面は残してある） */
+  visible: false,
   label: 'Message',
   heading: ['「あと一歩」を、', 'つなぐ会社でありたい。'],
   body: [

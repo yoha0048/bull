@@ -1,6 +1,6 @@
 ---
 import Logo from './Logo.astro';
-import { contactNav, mainNav } from '../data/site';
+import { contactNav, mainNav, navWithContact, site } from '../data/site';
 
 const current = Astro.url.pathname;
 const isCurrent = (href: string) => current.startsWith(href);
@@ -30,9 +30,13 @@ const isCurrent = (href: string) => current.startsWith(href);
           ))
         }
       </ul>
-      <a href={contactNav.href} class="nav-contact">
-        {contactNav.label}
-      </a>
+      {
+        site.contactEnabled && (
+          <a href={contactNav.href} class="nav-contact">
+            {contactNav.label}
+          </a>
+        )
+      }
     </nav>
 
     <button
@@ -58,7 +62,7 @@ const isCurrent = (href: string) => current.startsWith(href);
           </a>
         </li>
         {
-          [...mainNav, contactNav].map((item) => (
+          navWithContact.map((item) => (
             <li>
               <a
                 href={item.href}

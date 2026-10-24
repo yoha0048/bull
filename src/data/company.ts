@@ -10,7 +10,7 @@ export const company = {
   name: '株式会社bull',
   representative: '谷川 豪',
   representativeTitle: TBD,
-  postalCode: TBD,
+  postalCode: '105-0004',
   address: '東京都港区新橋3-3-14 田村町ビル10F',
   established: TBD,
   capital: TBD,
@@ -23,6 +23,15 @@ export const company = {
     'ビジネスマッチング・ネットワーク支援',
   ],
 } as const;
+
+/**
+ * 会社概要ページの会社情報表で、表示する項目の切り替え。
+ * false にすると、その行を表示しない（値は上の company に残しておける）。
+ */
+export const profileVisibility = {
+  established: false, // 設立（2026-10-24 非表示に決定）
+  capital: false, // 資本金（2026-10-24 非表示に決定）
+};
 
 /** 値が未入力（【要入力】）かどうか */
 export const isTBD = (value: string) => value === TBD;

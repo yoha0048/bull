@@ -3,16 +3,23 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import ContactForm from '../../components/ContactForm.astro';
 import Value from '../../components/Value.astro';
-import { categories, contactPage } from '../../data/contactForm';
+import { categories, contactMode, contactPage, telContact } from '../../data/contactForm';
+import { isTBD } from '../../data/company';
+import { site } from '../../data/site';
+
+const isTel = contactMode === 'tel';
+// tel: リンク用に数字と + 以外を除く
+const telHref = isTBD(telContact.tel) ? '' : `tel:${telContact.tel.replace(/[^\d+]/g, '')}`;
 ---
 
 <BaseLayout
   title="お問い合わせ"
+  noindex={!site.contactEnabled}
   description="株式会社bullへのお問い合わせ・ご相談はこちらから。営業支援、販路拡大、海外ビジネス、ビジネスマッチングなど、まだかたちになっていないご相談も歓迎します。"
 >
   <PageHero labelEn={contactPage.labelEn} title={contactPage.title} lead={contactPage.lead} />
 
-  <section class="contact" aria-label="お問い合わせフォーム">
+  <section class="contact" aria-label={isTel ? 'お電話でのお問い合わせ' : 'お問い合わせフォーム'}>
     <div class="container contact__inner">
       <aside class="contact__side">
         <p class="label">Topics</p>
@@ -20,22 +27,56 @@ import { categories, contactPage } from '../../data/contactForm';
         <ul class="contact__topics">
           {categories.filter((c) => c !== 'その他').map((c) => <li>{c.replace('について', '')}</li>)}
         </ul>
-        <p class="contact__side-text">どれに当てはまるか分からないご相談は、「その他」からお送りください。</p>
-
-        <dl class="contact__info">
-          <div>
-            <dt>返信の目安</dt>
-            <dd><Value value={contactPage.replyEstimate} /></dd>
-          </div>
-        </dl>
-        <p class="contact__side-note">
-          送信後、ご入力のメールアドレスに受付完了の自動返信メールをお送りします。
+        <p class="contact__side-text">
+          {
+            isTel
+              ? 'どれに当てはまるか分からないご相談も、お気軽にお電話ください。'
+              : 'どれに当てはまるか分からないご相談は、「その他」からお送りください。'
+          }
         </p>
+
+        {
+          !isTel && (
+            <>
+              <dl class="contact__info">
+                <div>
+                  <dt>返信の目安</dt>
+                  <dd><Value value={contactPage.replyEstimate} /></dd>
+                </div>
+              </dl>
+              <p class="contact__side-note">
+                送信後、ご入力のメールアドレスに受付完了の自動返信メールをお送りします。
+              </p>
+            </>
+          )
+        }
       </aside>
 
-      <div class="contact__form">
-        <ContactForm />
-      </div>
+      {
+        isTel ? (
+          <div class="contact__tel">
+            <p class="label">Tel</p>
+            <h2 class="contact__tel-heading">お電話でのお問い合わせ</h2>
+            <p class="contact__tel-number">
+              {telHref ? <a href={telHref}>{telContact.tel}</a> : <Value value={telContact.tel} />}
+            </p>
+            <dl class="contact__tel-info">
+              <div>
+                <dt>受付時間</dt>
+                <dd>
+                  <Value value={telContact.hours} />
+                  {telContact.hoursNote && <span class="contact__tel-hours-note">{telContact.hoursNote}</span>}
+                </dd>
+              </div>
+            </dl>
+            <p class="contact__tel-text">{contactPage.telNote}</p>
+          </div>
+        ) : (
+          <div class="contact__form">
+            <ContactForm />
+          </div>
+        )
+      }
     </div>
   </section>
 </BaseLayout>
@@ -134,7 +175,85 @@ import { categories, contactPage } from '../../data/contactForm';
     background: var(--color-paper);
   }
 
+  .contact__tel {
+    padding: clamp(28px, 5vw, 64px);
+    border-radius: 24px;
+    background: var(--color-paper);
+  }
+
+  .contact__tel-heading {
+    margin-top: 20px;
+    font-size: var(--fs-h3);
+  }
+
+  .contact__tel-number {
+    margin-top: clamp(24px, 4vw, 40px);
+    padding-bottom: clamp(20px, 3vw, 32px);
+    border-bottom: 1px solid var(--color-horizon);
+    font-family: var(--font-en);
+    font-size: clamp(2rem, 7vw, 4rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    color: var(--color-deep-navy);
+  }
+
+  .contact__tel-number a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .contact__tel-number a:hover {
+    color: var(--color-blue);
+  }
+
+  .contact__tel-number :global(.tbd) {
+    font-family: var(--font-ja);
+    font-size: 0.5em;
+  }
+
+  .contact__tel-info {
+    margin: 24px 0 0;
+  }
+
+  .contact__tel-info div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+
+  .contact__tel-info dt {
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--color-slate);
+  }
+
+  .contact__tel-info dd {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .contact__tel-hours-note {
+    display: block;
+    font-size: var(--fs-small);
+    font-weight: 400;
+    color: var(--color-slate);
+  }
+
+  .contact__tel-text {
+    margin-top: 24px;
+    font-size: var(--fs-small);
+    color: var(--color-slate);
+    line-height: 1.9;
+  }
+
   @media (max-width: 599px) {
+    .contact__tel {
+      margin-inline: calc(var(--gutter) * -0.5);
+      padding: 28px 20px;
+      border-radius: 16px;
+    }
+
     .contact__form {
       margin-inline: calc(var(--gutter) * -0.5);
       padding: 28px 20px;

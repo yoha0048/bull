@@ -23,6 +23,12 @@ export const site = {
    * ※計測タグ自体は未実装。導入する場合は計測タグの追加も必要。
    */
   useGoogleAnalytics: false,
+  /**
+   * お問い合わせ機能を表示するか（2026-10-24 時点の決定：いったん非表示）。
+   * false の間は、ヘッダー・フッターのリンク、各ページ下部の相談誘導、会社概要の「お問い合わせ」行を表示せず、
+   * /contact/ ページは検索結果に出さない（noindex）。電話番号・メールアドレスが決まったら true に戻す。
+   */
+  contactEnabled: false,
 } as const;
 
 export type NavItem = {
@@ -42,6 +48,9 @@ export const contactNav: NavItem = {
   labelEn: 'Contact',
   href: '/contact/',
 };
+
+/** お問い合わせを含むナビゲーション（お問い合わせ非表示の間は mainNav と同じ） */
+export const navWithContact: NavItem[] = site.contactEnabled ? [...mainNav, contactNav] : mainNav;
 
 export const privacyNav: NavItem = {
   label: 'プライバシーポリシー',

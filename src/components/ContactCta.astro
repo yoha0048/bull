@@ -1,10 +1,14 @@
 ---
-/** 各ページ下部の「お問い合わせ」への誘導。水平線のグラデーションで締める。 */
+/**
+ * 各ページ下部の「お問い合わせ」への誘導。水平線のグラデーションで締める。
+ * site.contactEnabled が false の間は何も表示しない。
+ */
 import ButtonLink from './ButtonLink.astro';
 import { contactCta } from '../data/top';
-import { contactNav } from '../data/site';
+import { contactNav, site } from '../data/site';
 ---
 
+{site.contactEnabled && (
 <section class="cta" aria-labelledby="cta-heading" data-cta data-header-dark>
   <div class="cta__horizon" aria-hidden="true">
     <span class="cta__line" data-cta-line></span>
@@ -20,6 +24,7 @@ import { contactNav } from '../data/site';
     <ButtonLink href={contactNav.href} variant="light">{contactCta.button}</ButtonLink>
   </div>
 </section>
+)}
 
 <style>
   .cta {

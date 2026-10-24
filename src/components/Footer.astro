@@ -1,7 +1,7 @@
 ---
 import Logo from './Logo.astro';
 import { company } from '../data/company';
-import { contactNav, mainNav, privacyNav, site } from '../data/site';
+import { navWithContact, privacyNav, site } from '../data/site';
 
 const year = new Date().getFullYear();
 ---
@@ -21,7 +21,7 @@ const year = new Date().getFullYear();
       <ul>
         <li><a href="/">Top</a></li>
         {
-          [...mainNav, contactNav].map((item) => (
+          navWithContact.map((item) => (
             <li>
               <a href={item.href}>{item.labelEn}</a>
             </li>

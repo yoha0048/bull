@@ -4,9 +4,10 @@ import PageHero from '../../components/PageHero.astro';
 import ContactCta from '../../components/ContactCta.astro';
 import Value from '../../components/Value.astro';
 import { aboutHero, message, philosophy } from '../../data/about';
-import { company, isTBD, TBD } from '../../data/company';
+import { company, isTBD, profileVisibility, TBD } from '../../data/company';
+import { contactMode, telContact } from '../../data/contactForm';
 import { assets } from '../../data/assets';
-import { contactNav } from '../../data/site';
+import { contactNav, site } from '../../data/site';
 
 // 役職名が未定の間は「代表」と表示する（要望書の表記「代表者」に合わせる）
 const representativeTitle = isTBD(company.representativeTitle) ? '代表' : company.representativeTitle;
@@ -15,7 +16,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 <BaseLayout
   title="会社概要"
-  description="株式会社bullの会社概要。理念「人とつながる、そして世界とつなぐ。」、代表メッセージ、会社情報を掲載しています。"
+  description={`株式会社bullの会社概要。理念「人とつながる、そして世界とつなぐ。」${message.visible ? '、代表メッセージ' : ''}、会社情報を掲載しています。`}
 >
   <PageHero labelEn={aboutHero.labelEn} title={aboutHero.title} lead={aboutHero.lead} />
 
@@ -48,7 +49,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
     </div>
   </section>
 
-  <!-- ========== Message ========== -->
+  <!-- ========== Message（about.ts の message.visible で表示切り替え） ========== -->
+  {message.visible && (
   <section class="message" aria-labelledby="message-heading">
     <div class="container message__inner">
       <figure class="message__visual" data-fade>
@@ -86,6 +88,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       </div>
     </div>
   </section>
+  )}
 
   <!-- ========== Company Profile ========== -->
   <section class="profile" aria-labelledby="profile-heading">
@@ -114,14 +117,22 @@ const pad = (n: number) => String(n).padStart(2, '0');
             {company.address}
           </dd>
         </div>
-        <div class="profile__row">
-          <dt>設立</dt>
-          <dd><Value value={company.established} /></dd>
-        </div>
-        <div class="profile__row">
-          <dt>資本金</dt>
-          <dd><Value value={company.capital} /></dd>
-        </div>
+        {
+          profileVisibility.established && (
+            <div class="profile__row">
+              <dt>設立</dt>
+              <dd><Value value={company.established} /></dd>
+            </div>
+          )
+        }
+        {
+          profileVisibility.capital && (
+            <div class="profile__row">
+              <dt>資本金</dt>
+              <dd><Value value={company.capital} /></dd>
+            </div>
+          )
+        }
         <div class="profile__row">
           <dt>事業内容</dt>
           <dd>
@@ -130,13 +141,26 @@ const pad = (n: number) => String(n).padStart(2, '0');
             </ul>
           </dd>
         </div>
-        <div class="profile__row">
-          <dt>お問い合わせ</dt>
-          <dd>
-            <a href={contactNav.href} class="profile__link">お問い合わせフォーム</a>
-            {company.email !== TBD && <><br />{company.email}</>}
-          </dd>
-        </div>
+        {
+          site.contactEnabled && (
+            <div class="profile__row">
+              <dt>お問い合わせ</dt>
+              <dd>
+                {
+                  contactMode === 'tel' ? (
+                    <>
+                      TEL <Value value={telContact.tel} />
+                      {!isTBD(telContact.hours) && <>（受付時間：{telContact.hours}）</>}
+                    </>
+                  ) : (
+                    <a href={contactNav.href} class="profile__link">お問い合わせフォーム</a>
+                  )
+                }
+                {company.email !== TBD && <><br />{company.email}</>}
+              </dd>
+            </div>
+          )
+        }
       </dl>
     </div>
   </section>
