@@ -14,3 +14,9 @@ npm-debug.log*
 
 # macOS
 .DS_Store
+
+# 社内資料（GitHubには上げない。ローカルのみで管理）
+CLAUDE.md
+docs/requirements.md
+docs/proposal.md
+docs/required-info.md
