@@ -1,7 +1,8 @@
 ---
 import Logo from './Logo.astro';
-import { company } from '../data/company';
+import { company, TBD } from '../data/company';
 import { navWithContact, privacyNav, site } from '../data/site';
+import { assets } from '../data/assets';
 
 const year = new Date().getFullYear();
 ---
@@ -33,10 +34,25 @@ const year = new Date().getFullYear();
     <div class="site-footer__company">
       <p class="site-footer__name">{company.name}</p>
       <p>{company.address}</p>
+      {
+        company.email !== TBD && (
+          <p class="site-footer__email">
+            <span class="site-footer__email-label">お問い合わせ</span>
+            <a href={`mailto:${company.email}`}>{company.email}</a>
+          </p>
+        )
+      }
     </div>
   </div>
 
   <div class="container">
+    {
+      assets.footerMark && (
+        <div class="site-footer__mark">
+          <img src={assets.footerMark} alt="" width="480" height="347" loading="lazy" decoding="async" />
+        </div>
+      )
+    }
     <div class="site-footer__bottom">
       <a href={privacyNav.href}>{privacyNav.label}</a>
       <small>&copy; {year} {company.name}</small>
@@ -110,10 +126,47 @@ const year = new Date().getFullYear();
     color: rgb(255 255 255 / 0.72);
   }
 
+  .site-footer__email {
+    margin-top: 16px;
+  }
+
+  .site-footer__email-label {
+    display: block;
+    font-size: var(--fs-label);
+    letter-spacing: 0.08em;
+    color: rgb(255 255 255 / 0.6);
+  }
+
+  .site-footer__email a {
+    font-family: var(--font-en);
+    color: var(--color-white);
+    transition: color 0.3s;
+  }
+
+  .site-footer__email a:hover {
+    color: var(--color-horizon);
+  }
+
   .site-footer__name {
     color: var(--color-white);
     font-weight: 700;
     margin-bottom: 4px;
+  }
+
+  /* 右下のブルドッグ。足元が下の区切り線に乗るように置く */
+  .site-footer__mark {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: clamp(40px, 6vw, 64px);
+  }
+
+  .site-footer__mark img {
+    width: clamp(120px, 14vw, 180px);
+    height: auto;
+  }
+
+  .site-footer__mark + .site-footer__bottom {
+    margin-top: 0;
   }
 
   .site-footer__bottom {
