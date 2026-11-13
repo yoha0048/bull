@@ -31,6 +31,12 @@ public/
 2. `src/data/assets.ts` にパスを書く（例：`logo: '/images/logo/bull-logo.svg'`）
 3. 空のままなら、ロゴは文字ロゴ「bull」が表示される
 
+### フッター右下のブルドッグのマーク
+
+- 画像：`public/images/logo/bull-mark-white.png`（白一色・背景透明・横480px）。元データ `bull_white.png` の「bull」の文字を含めて白にし、余白を切り落として縮小したもの（約1.3MB → 約25KB）
+- 設定：`src/data/assets.ts` の `footerMark`。空文字にするとフッターに表示されない
+- 差し替えるときは、白一色・背景透明のPNGを同じ名前で上書きする（濃紺の背景の上に置くため）
+
 ## 独自ドメインを設定するとき（ドメイン決定後）
 
 1. `astro.config.mjs` の `site` に `https://【ドメイン名】` を設定する

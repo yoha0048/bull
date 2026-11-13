@@ -15,7 +15,8 @@ export const company = {
   established: TBD,
   capital: TBD,
   tel: TBD,
-  email: TBD,
+  /** 問い合わせ先のメールアドレス（全ページのフッターに表示） */
+  email: 'info@bull-inc.co.jp',
   business: [
     '営業支援・営業代行',
     '販路拡大支援',
