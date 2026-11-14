@@ -4,20 +4,18 @@
  *
  * 本文中の {company} は会社名に置き換えて表示されます。
  */
-import { TBD } from './company';
+import { company } from './company';
 
 export const privacyMeta = {
   /** 制定日（例：'2026年11月1日'） */
-  enactedOn: TBD,
+  enactedOn: '2026年11月14日',
   /** 最終改定日。改定したときに設定する（空なら表示しない） */
   revisedOn: '',
 };
 
-/** お問い合わせ窓口 */
+/** お問い合わせ窓口（メールアドレスは会社情報の email と同じものを表示） */
 export const privacyContact = {
-  department: TBD,
-  email: TBD,
-  tel: TBD,
+  email: company.email,
 };
 
 export type PrivacyLink = { label: string; href: string };
