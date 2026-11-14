@@ -51,34 +51,39 @@ const isCurrent = (href: string) => current.startsWith(href);
       <span class="menu-button__bar" aria-hidden="true"></span>
     </button>
   </div>
-
-  <div class="mobile-menu" id="mobile-menu" data-menu hidden>
-    <nav class="mobile-menu__inner" aria-label="メインメニュー">
-      <ul>
-        <li>
-          <a href="/" class="mobile-link">
-            <span class="mobile-link__en">Top</span>
-            <span class="mobile-link__ja">トップ</span>
-          </a>
-        </li>
-        {
-          navWithContact.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                class="mobile-link"
-                aria-current={isCurrent(item.href) ? 'page' : undefined}
-              >
-                <span class="mobile-link__en">{item.labelEn}</span>
-                <span class="mobile-link__ja">{item.label}</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
-  </div>
 </header>
+
+{/*
+  スマホ用メニューは <header> の外に置く。
+  ヘッダーには半透明のぼかし（backdrop-filter）がかかっており、iPhoneのSafariでは
+  その中に置いた position: fixed の要素が「画面全体」ではなく「ヘッダーの枠」を基準にしてしまうため。
+*/}
+<div class="mobile-menu" id="mobile-menu" data-menu hidden>
+  <nav class="mobile-menu__inner" aria-label="メインメニュー">
+    <ul>
+      <li>
+        <a href="/" class="mobile-link">
+          <span class="mobile-link__en">Top</span>
+          <span class="mobile-link__ja">トップ</span>
+        </a>
+      </li>
+      {
+        navWithContact.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class="mobile-link"
+              aria-current={isCurrent(item.href) ? 'page' : undefined}
+            >
+              <span class="mobile-link__en">{item.labelEn}</span>
+              <span class="mobile-link__ja">{item.label}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</div>
 
 <script>
   const header = document.querySelector<HTMLElement>('[data-header]');
@@ -118,6 +123,22 @@ const isCurrent = (href: string) => current.startsWith(href);
       menu.hidden = !open;
       document.documentElement.classList.toggle('is-menu-open', open);
     };
+
+    // メニューを開いている間は背面のページをスクロールさせない。
+    // iPhoneのSafariは html の overflow: hidden だけでは指でのスクロールが止まらないため、
+    // メニューの外（またはスクロールする必要のないメニュー）での指の動きを無効にする。
+    // ページのスクロール位置自体は動かさないので、閉じると元の位置のまま表示される
+    // （スクロール連動の演出にも影響しない）。
+    document.addEventListener(
+      'touchmove',
+      (event) => {
+        if (menu.hidden) return;
+        const insideMenu = event.target instanceof Node && menu.contains(event.target);
+        const menuScrollable = menu.scrollHeight > menu.clientHeight;
+        if (!insideMenu || !menuScrollable) event.preventDefault();
+      },
+      { passive: false },
+    );
 
     button.addEventListener('click', () => {
       setOpen(button.getAttribute('aria-expanded') !== 'true');
@@ -351,11 +372,14 @@ const isCurrent = (href: string) => current.startsWith(href);
     transform: translateY(-4.5px) rotate(-45deg);
   }
 
+  /* 画面全体を覆う。ヘッダー（z-index: 100）のすぐ下に重ね、閉じるボタンは見えるようにする */
   .mobile-menu {
     position: fixed;
     inset: 0;
-    z-index: 1;
+    z-index: 99;
     overflow-y: auto;
+    /* メニュー内のスクロールが端に達しても、背面のページに伝わらないようにする */
+    overscroll-behavior: contain;
     background: var(--color-paper);
     padding: calc(var(--header-height) + 32px) var(--gutter) 48px;
   }
